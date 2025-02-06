@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { TextField, Button, Text, Callout } from "@radix-ui/themes";
+import { TextField, Button, Callout } from "@radix-ui/themes";
 import SimpleMDE from "react-simplemde-editor";
 import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,17 @@ const NewIssuePage = () => {
     resolver: zodResolver(createIssueSchema),
   });
 
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setIsSubmitting(true);
+      await axios.post("/api/issues", data);
+      router.push("/issues");
+    } catch (error) {
+      setIsSubmitting(false);
+      setError("An unexpected error occurred");
+    }
+  });
+
   return (
     <div className="max-w-xl">
       {error && (
@@ -35,19 +46,7 @@ const NewIssuePage = () => {
         </Callout.Root>
       )}
 
-      <form
-        className="space-y-3"
-        onSubmit={handleSubmit(async (data) => {
-          try {
-            setIsSubmitting(true);
-            await axios.post("/api/issues", data);
-            router.push("/issues");
-          } catch (error) {
-            setIsSubmitting(false);
-            setError("An unexpected error occurred");
-          }
-        })}
-      >
+      <form className="space-y-3" onSubmit={onSubmit}>
         <TextField.Root
           placeholder="Title"
           {...register("title")}
